@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>אוצר מילים באנגלית — מטבח וחופשות</title>
+<style>
+  :root {
+    --navy-900: #101f38;
+    --navy-800: #16294a;
+    --navy-700: #1e3a66;
+    --navy-600: #2a4d85;
+    --navy-100: #dbe4f2;
+    --gray-bg: #eef1f6;
+    --white: #ffffff;
+    --text-main: #16294a;
+    --text-soft: #5b6b85;
+    --green: #16a34a;
+    --green-soft: #e8f7ee;
+    --red: #dc2626;
+    --red-soft: #fdecec;
+    --radius-lg: 22px;
+    --radius-md: 16px;
+    --shadow-card: 0 10px 30px rgba(16, 31, 56, 0.10);
+    --shadow-soft: 0 4px 14px rgba(16, 31, 56, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: "Segoe UI", "Heebo", "Arial Hebrew", Arial, sans-serif;
+    background: var(--gray-bg);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    min-height: 100dvh;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 0 16px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  /* ===== Header ===== */
+  .app-header {
+    background: linear-gradient(135deg, var(--navy-900), var(--navy-700));
+    color: var(--white);
+    margin: 0 -16px;
+    padding: calc(20px + env(safe-area-inset-top)) 24px 26px;
+    border-radius: 0 0 28px 28px;
+    box-shadow: var(--shadow-card);
+  }
+  .app-header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.2px; }
+  .app-header p  { font-size: 0.85rem; color: var(--navy-100); margin-top: 4px; }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--navy-100);
+  }
+  .progress-row .score-chip {
+    background: rgba(255,255,255,0.14);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .progress-track {
+    margin-top: 10px;
+    height: 8px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #6ea8ff, #a5c8ff);
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  /* ===== Screens ===== */
+  .screen { display: none; flex: 1; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ===== Start screen ===== */
+  .start-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 28px 22px;
+    margin-top: 24px;
+    text-align: center;
+  }
+  .start-card .emoji { font-size: 2.6rem; }
+  .start-card h2 { font-size: 1.35rem; margin-top: 12px; }
+  .start-card p  { color: var(--text-soft); font-size: 0.95rem; margin-top: 8px; line-height: 1.6; }
+
+  .category-grid { display: grid; gap: 12px; margin-top: 22px; }
+  .category-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 16px 18px;
+    border: 2px solid var(--navy-100);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: right;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+  .category-btn .cat-icon { font-size: 1.4rem; }
+  .category-btn .cat-sub { display: block; font-size: 0.8rem; font-weight: 400; color: var(--text-soft); margin-top: 2px; }
+  .category-btn.selected {
+    border-color: var(--navy-700);
+    background: var(--navy-100);
+  }
+  .category-btn:active { transform: scale(0.98); }
+
+  /* בחירת חלק (Phrasal Verbs) */
+  .parts-grid {
+    display: none;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .parts-grid.show { display: grid; }
+  .part-btn {
+    padding: 12px 2px;
+    border: 2px solid var(--navy-100);
+    border-radius: 14px;
+    background: var(--white);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+  .part-btn .part-sub {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 400;
+    opacity: 0.75;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .part-btn.selected {
+    background: var(--navy-700);
+    border-color: var(--navy-700);
+    color: var(--white);
+  }
+  .part-btn:active { transform: scale(0.95); }
+
+  /* מעבר בין חלקים בתוך התרגול */
+  .part-chips {
+    display: none;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .part-chips.show { display: flex; }
+  .part-chip {
+    flex: 1;
+    min-height: 46px;
+    border: none;
+    border-radius: 14px;
+    background: var(--white);
+    color: var(--navy-700);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+  .part-chip.active {
+    background: linear-gradient(135deg, var(--navy-800), var(--navy-600));
+    color: var(--white);
+  }
+  .part-chip:active { transform: scale(0.95); }
+
+  .primary-btn {
+    width: 100%;
+    margin-top: 22px;
+    padding: 17px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--navy-800), var(--navy-600));
+    color: var(--white);
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.1s ease, opacity 0.15s ease;
+  }
+  .primary-btn:active { transform: scale(0.98); }
+  .primary-btn:disabled { opacity: 0.45; cursor: default; }
+
+  /* ===== Quiz screen ===== */
+  .word-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 30px 20px;
+    margin-top: 22px;
+    text-align: center;
+  }
+  .word-category {
+    display: inline-block;
+    background: var(--navy-100);
+    color: var(--navy-700);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 999px;
+  }
+  .word-english {
+    direction: ltr;
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-top: 14px;
+    color: var(--navy-900);
+    word-break: break-word;
+  }
+  .word-hint { color: var(--text-soft); font-size: 0.88rem; margin-top: 10px; }
+
+  .options { display: grid; gap: 12px; margin-top: 20px; }
+  .option-btn {
+    width: 100%;
+    min-height: 60px;
+    padding: 16px 18px;
+    border: 2px solid var(--navy-100);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: center;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.1s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  .option-btn:active { transform: scale(0.98); }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.correct {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--white);
+    box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35);
+  }
+  .option-btn.wrong {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--white);
+    box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35);
+  }
+  .option-btn.dimmed { opacity: 0.55; }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 13px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.good { background: var(--green-soft); color: #14813c; }
+  .feedback.bad  { background: var(--red-soft); color: #b31d1d; }
+
+  .next-btn { visibility: hidden; }
+  .next-btn.show { visibility: visible; }
+
+  /* ===== Result screen ===== */
+  .result-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 32px 22px;
+    margin-top: 28px;
+    text-align: center;
+  }
+  .result-card .emoji { font-size: 3rem; }
+  .result-card h2 { font-size: 1.4rem; margin-top: 12px; }
+  .score-circle {
+    width: 132px;
+    height: 132px;
+    margin: 22px auto 0;
+    border-radius: 50%;
+    background: conic-gradient(var(--navy-600) calc(var(--pct) * 1%), var(--navy-100) 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-circle .inner {
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-circle .pct { font-size: 1.5rem; font-weight: 800; color: var(--navy-800); }
+  .score-circle .frac { font-size: 0.82rem; color: var(--text-soft); margin-top: 2px; }
+  .result-msg { color: var(--text-soft); font-size: 0.95rem; margin-top: 18px; line-height: 1.6; }
+
+  .result-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .breakdown-box {
+    background: var(--gray-bg);
+    border-radius: var(--radius-md);
+    padding: 14px 10px;
+  }
+  .breakdown-box .num { font-size: 1.3rem; font-weight: 800; }
+  .breakdown-box .lbl { font-size: 0.8rem; color: var(--text-soft); margin-top: 2px; }
+  .breakdown-box.good .num { color: var(--green); }
+  .breakdown-box.bad  .num { color: var(--red); }
+
+  .secondary-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 15px;
+    border: 2px solid var(--navy-100);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    color: var(--navy-700);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+  }
+  .secondary-btn:active { transform: scale(0.98); }
+
+  @media (min-width: 480px) {
+    .word-english { font-size: 2.4rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="app-header">
+    <h1>אוצר מילים באנגלית</h1>
+    <p>מטבח, חופשות ו-Phrasal Verbs — רמה מתקדמת</p>
+    <div class="progress-row" id="progressRow" style="display:none;">
+      <span id="questionCounter">שאלה 1 מתוך 90</span>
+      <span class="score-chip" id="scoreChip">נכונות: 0</span>
+    </div>
+    <div class="progress-track" id="progressTrack" style="display:none;">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </header>
+
+  <!-- ===== Start screen ===== -->
+  <section class="screen active" id="startScreen">
+    <div class="start-card">
+      <div class="emoji">📚</div>
+      <h2>מוכנים לתרגל?</h2>
+      <p>בכל שאלה תוצג מילה באנגלית ברמה גבוהה, ועליכם לבחור את התרגום הנכון בעברית מתוך 4 אפשרויות. תקבלו פידבק מיידי על כל תשובה.</p>
+
+      <div class="category-grid">
+        <button class="category-btn selected" data-cat="all">
+          <span class="cat-icon">🎯</span>
+          <span>כל הנושאים
+            <span class="cat-sub">240 שאלות — כל הנושאים במעורב</span>
+          </span>
+        </button>
+        <button class="category-btn" data-cat="מטבח">
+          <span class="cat-icon">🍳</span>
+          <span>מטבח וקולינריה
+            <span class="cat-sub">45 שאלות — טכניקות, כלים וביטויים</span>
+          </span>
+        </button>
+        <button class="category-btn" data-cat="חופשות">
+          <span class="cat-icon">✈️</span>
+          <span>חופשות, נסיעות ואירוח
+            <span class="cat-sub">45 שאלות — תעופה, מלונאות וטיולים</span>
+          </span>
+        </button>
+        <button class="category-btn" data-cat="פעלים">
+          <span class="cat-icon">🔗</span>
+          <span>Phrasal Verbs
+            <span class="cat-sub">150 שאלות — 5 חלקים של 30 שאלות</span>
+          </span>
+        </button>
+        <div class="parts-grid" id="partsGrid">
+          <button class="part-btn selected" data-part="1">חלק 1<span class="part-sub">1–30</span></button>
+          <button class="part-btn" data-part="2">חלק 2<span class="part-sub">31–60</span></button>
+          <button class="part-btn" data-part="3">חלק 3<span class="part-sub">61–90</span></button>
+          <button class="part-btn" data-part="4">חלק 4<span class="part-sub">91–120</span></button>
+          <button class="part-btn" data-part="5">חלק 5<span class="part-sub">121–150</span></button>
+        </div>
+      </div>
+
+      <button class="primary-btn" id="startBtn">התחילו לתרגל</button>
+    </div>
+  </section>
+
+  <!-- ===== Quiz screen ===== -->
+  <section class="screen" id="quizScreen">
+    <div class="part-chips" id="partChips"></div>
+
+    <div class="word-card">
+      <span class="word-category" id="wordCategory"></span>
+      <div class="word-english" id="wordEnglish"></div>
+      <div class="word-hint">מהו התרגום הנכון בעברית?</div>
+    </div>
+
+    <div class="options" id="optionsContainer"></div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="primary-btn next-btn" id="nextBtn">שאלה הבאה</button>
+  </section>
+
+  <!-- ===== Result screen ===== -->
+  <section class="screen" id="resultScreen">
+    <div class="result-card">
+      <div class="emoji" id="resultEmoji">🏆</div>
+      <h2>סיימתם את התרגול!</h2>
+
+      <div class="score-circle" id="scoreCircle" style="--pct:0;">
+        <div class="inner">
+          <span class="pct" id="resultPct">0%</span>
+          <span class="frac" id="resultFrac">0 מתוך 0</span>
+        </div>
+      </div>
+
+      <p class="result-msg" id="resultMsg"></p>
+
+      <div class="result-breakdown">
+        <div class="breakdown-box good">
+          <div class="num" id="correctCount">0</div>
+          <div class="lbl">תשובות נכונות</div>
+        </div>
+        <div class="breakdown-box bad">
+          <div class="num" id="wrongCount">0</div>
+          <div class="lbl">תשובות שגויות</div>
+        </div>
+      </div>
+
+      <button class="primary-btn" id="nextPartBtn" style="display:none;">המשך לחלק הבא</button>
+      <button class="primary-btn" id="restartBtn">תרגול חדש</button>
+      <button class="secondary-btn" id="backToMenuBtn">חזרה לבחירת נושא</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+
+/* =====================================================
+   מאגר השאלות — 90 שאלות ייחודיות
+   45 שאלות: מטבח וקולינריה | 45 שאלות: חופשות ונסיעות
+   ===================================================== */
+const QUESTIONS = [
+  /* ---------- מטבח וקולינריה (45) ---------- */
+  { word: "Whisk", category: "מטבח", options: ["מצקת", "מטרפה (להקציף)", "מסננת", "פומפייה"], correct: 1 },
+  { word: "Sauté", category: "מטבח", options: ["להקפיץ במחבת עם מעט שמן", "לבשל באדים", "לאפות בתנור", "להשרות במרינדה"], correct: 0 },
+  { word: "Simmer", category: "מטבח", options: ["להרתיח בעוצמה", "לטגן בשמן עמוק", "לבשל על אש נמוכה בבעבוע עדין", "לצנן במהירות"], correct: 2 },
+  { word: "Zest", category: "מטבח", options: ["מיץ סחוט טרי", "גרעיני פרי", "ציפוי סוכר", "גרידת קליפת הדר"], correct: 3 },
+  { word: "Julienne", category: "מטבח", options: ["חיתוך לרצועות דקות וארוכות", "חיתוך לקוביות גדולות", "טחינה למחית", "פריסה לעיגולים"], correct: 0 },
+  { word: "Colander", category: "מטבח", options: ["מחבת עמוקה", "מסננת לניקוז נוזלים", "קרש חיתוך", "כף עץ"], correct: 1 },
+  { word: "Marinate", category: "מטבח", options: ["לקצוץ דק", "לצלות בשיפוד", "להשרות בתערובת תיבול", "לקרר במקפיא"], correct: 2 },
+  { word: "Scald", category: "מטבח", options: ["להקפיא במהירות", "לחמם נוזל עד סף רתיחה", "להוסיף מלח גס", "ללוש בצק"], correct: 1 },
+  { word: "Braise", category: "מטבח", options: ["טיגון מהיר בווק", "אפייה ללא כיסוי", "הקצפה עם סוכר", "צריבה ואז בישול ארוך בנוזל בסיר סגור"], correct: 3 },
+  { word: "Garnish", category: "מטבח", options: ["לקשט את המנה לפני ההגשה", "לסנן את הרוטב", "לחתוך לפרוסות", "לתבל בחריף"], correct: 0 },
+  { word: "Skewer", category: "מטבח", options: ["מערוך לבצק", "שיפוד", "מסחטת שום", "פותחן קופסאות"], correct: 1 },
+  { word: "Knead", category: "מטבח", options: ["לנפות קמח", "להקציף ביצים", "ללוש בצק", "לחתוך ירקות"], correct: 2 },
+  { word: "Dredge", category: "מטבח", options: ["לצפות בקמח או בפירורים לפני טיגון", "להרתיח במים מלוחים", "לקלף ירקות שורש", "לערבב בתנועות קיפול"], correct: 0 },
+  { word: "Ramekin", category: "מטבח", options: ["סיר לחץ", "מחבת פסים", "כלי אפייה אישי קטן", "קערת ערבוב גדולה"], correct: 2 },
+  { word: "Broil", category: "מטבח", options: ["לבשל בקיטור", "לצלות בחום עליון ישיר", "לטגן בשמן עמוק", "להשרות במי מלח"], correct: 1 },
+  { word: "Blanch", category: "מטבח", options: ["לחלוט קצרות במים רותחים ולצנן", "לצרוב על גריל לוהט", "לתסוס בטמפרטורת החדר", "לייבש בתנור נמוך"], correct: 0 },
+  { word: "Deglaze", category: "מטבח", options: ["להסיר שומן מהמרק", "לצפות עוגה בזיגוג", "לחמם צלחות הגשה", "להוסיף נוזל למחבת חמה להמסת המשקעים"], correct: 3 },
+  { word: "Emulsify", category: "מטבח", options: ["להקפיא לשכבות", "לתחלב — לאחד שומן ונוזל לתערובת אחידה", "להפריד חלבון מחלמון", "להמיס על אדים"], correct: 1 },
+  { word: "Ferment", category: "מטבח", options: ["לצלות באש גלויה", "לסנן דרך בד", "להתסיס", "להקציף לקצף יציב"], correct: 2 },
+  { word: "Infuse", category: "מטבח", options: ["להשרות רכיב בנוזל כדי להעביר טעם", "לחתוך בסכין משוננת", "לאדות ירקות עלים", "לקרר בהדרגה"], correct: 0 },
+  { word: "Poach", category: "מטבח", options: ["לטגן משני הצדדים", "לבשל בעדינות בנוזל שאינו רותח", "לצלות על גחלים", "לאפות בחום גבוה"], correct: 1 },
+  { word: "Reduce", category: "מטבח", options: ["להקטין את הלהבה", "לחתוך למנות קטנות", "לצמצם רוטב על ידי אידוי נוזלים", "להוריד את המלח"], correct: 2 },
+  { word: "Render", category: "מטבח", options: ["להמיס שומן מן החי על אש נמוכה", "לגרד גבינה קשה", "לרכך חמאה קרה", "לפזר אבקת סוכר"], correct: 0 },
+  { word: "Sear", category: "מטבח", options: ["להפשיר לאט", "לבשל באמבט מים", "לתבל ברוטב סויה", "לצרוב בחום גבוה ליצירת קראסט"], correct: 3 },
+  { word: "Steep", category: "מטבח", options: ["להשרות בנוזל חם (כמו תה)", "להרתיח עד צמצום", "ללוש זמן ממושך", "לקצוץ גס"], correct: 0 },
+  { word: "Chiffonade", category: "מטבח", options: ["קיפול קצף לבלילה", "חיתוך עלים לרצועות דקיקות", "עיטור בשוקולד מומס", "טחינת תבלינים במכתש"], correct: 1 },
+  { word: "Fillet", category: "מטבח", options: ["לצלות שלם על שיפוד", "לרסק למחית חלקה", "להפריד בשר או דג מהעצמות", "לכסות בבצק עלים"], correct: 2 },
+  { word: "Mince", category: "מטבח", options: ["לקצוץ דק מאוד", "לפרוס דק", "לרסק במעבד מזון", "לחתוך לקוביות"], correct: 0 },
+  { word: "Parboil", category: "מטבח", options: ["להרתיח פעמיים", "לבשל חלקית במים רותחים", "לבשל בסיר לחץ", "להלבין באדים"], correct: 1 },
+  { word: "Purée", category: "מטבח", options: ["רוטב חמאה צרפתי", "בצק מרודד דק", "ציר עוף מרוכז", "מחית חלקה של ירקות או פירות"], correct: 3 },
+  { word: "Roast", category: "מטבח", options: ["לצלות בתנור בחום יבש", "לבשל במים רותחים", "לטגן בשכבת שמן דקה", "לעשן בעשן קר"], correct: 0 },
+  { word: "Steam", category: "מטבח", options: ["לצרוב במחבת ברזל", "לאדות", "להשרות בחומץ", "לצנן על רשת"], correct: 1 },
+  { word: "Stew", category: "מטבח", options: ["סלט ירקות קצוץ", "מאפה ממולא", "תבשיל ארוך בנוזלים", "מרק צח ומסונן"], correct: 2 },
+  { word: "Whip", category: "מטבח", options: ["להקציף עד קבלת נפח", "לרדד במערוך", "לזלף קרם", "לערבב בעדינות"], correct: 0 },
+  { word: "Grater", category: "מטבח", options: ["מסחטת הדרים", "מזלג צלייה", "פומפייה", "כף מדידה"], correct: 2 },
+  { word: "Ladle", category: "מטבח", options: ["מצקת", "מרית סיליקון", "מטרפת בלונים", "כף חורים"], correct: 0 },
+  { word: "Spatula", category: "מטבח", options: ["סכין קילוף", "מרית להפיכה ולערבוב", "מגרדת קליפות", "פותחן יין"], correct: 1 },
+  { word: "Tongs", category: "מטבח", options: ["משפך", "מספריים למטבח", "כפפות תנור", "מלקחיים"], correct: 3 },
+  { word: "Trivet", category: "מטבח", options: ["תחתית לכלים חמים", "מכסה זכוכית", "רשת צינון לעוגות", "תבנית סיליקון"], correct: 0 },
+  { word: "Casserole", category: "מטבח", options: ["מרק קר ספרדי", "תבשיל קדירה אפוי בתנור", "עוגת שכבות", "לחם מחמצת"], correct: 1 },
+  { word: "Zester", category: "מטבח", options: ["מד טמפרטורה לבשר", "כלי לגירוד קליפות הדרים", "מקצף חשמלי", "משקל מטבח"], correct: 1 },
+  { word: "Cleaver", category: "מטבח", options: ["סכין לחם משוננת", "סכין קילוף קטנה", "קופיץ — סכין קצבים רחבה", "סכין שף יפנית"], correct: 2 },
+  { word: "Sift", category: "מטבח", options: ["לנפות רכיבים יבשים", "להמיס באמבט מים", "לזלף בשקית זילוף", "לשקול במדויק"], correct: 0 },
+  { word: "Baste", category: "מטבח", options: ["לרוקן נוזלים מהתבנית", "לעטוף בנייר אפייה", "לחורר במזלג", "להרטיב צלי במיצים במהלך הצלייה"], correct: 3 },
+  { word: "Curdle", category: "מטבח", options: ["להסמיך בקמח תירס", "להתגבן — כשהתערובת נפרדת לגושים", "להזהיב בחמאה", "לקרש בג'לטין"], correct: 1 },
+
+  /* ---------- חופשות, נסיעות ואירוח (45) ---------- */
+  { word: "Itinerary", category: "חופשות", options: ["כרטיס עלייה למטוס", "מסלול נסיעה מפורט", "אשרת כניסה", "ביטוח נסיעות"], correct: 1 },
+  { word: "Accommodation", category: "חופשות", options: ["מקום לינה", "השכרת רכב", "העברה משדה התעופה", "חבילת נופש"], correct: 0 },
+  { word: "Excursion", category: "חופשות", options: ["דמי ביטול", "שדרוג מחלקה", "טיול יום מאורגן", "עמלת שירות"], correct: 2 },
+  { word: "Layover", category: "חופשות", options: ["ביטול טיסה", "עצירת ביניים בין טיסות", "עיכוב בהמראה", "טיסת המשך ישירה"], correct: 1 },
+  { word: "Jetlag", category: "חופשות", options: ["פחד טיסה", "מחלת ים", "אובדן כבודה", "יעפת — עייפות מהפרשי שעות"], correct: 3 },
+  { word: "Customs", category: "חופשות", options: ["מכס", "ביקורת דרכונים", "אולם הכבודה", "שער העלייה למטוס"], correct: 0 },
+  { word: "Embark", category: "חופשות", options: ["לרדת מהאונייה", "לעלות על כלי שיט או לצאת למסע", "לבטל הזמנה", "לעבור ביקורת ביטחונית"], correct: 1 },
+  { word: "Disembark", category: "חופשות", options: ["להמריא בזמן", "לאחר לטיסה", "לרדת מכלי תחבורה", "לעגון בנמל"], correct: 2 },
+  { word: "Hospitality", category: "חופשות", options: ["הכנסת אורחים ושירותי אירוח", "אשפוז רפואי בחו\"ל", "דמי שירות למלצר", "תיירות פנים"], correct: 0 },
+  { word: "Concierge", category: "חופשות", options: ["מנהל המלון", "טבח ראשי", "מאבטח הלובי", "פקיד שירות במלון המסייע לאורחים"], correct: 3 },
+  { word: "Luggage", category: "חופשות", options: ["חדר המתנה", "מטען — מזוודות ותיקים", "עגלת קניות", "תא אחסון"], correct: 1 },
+  { word: "Souvenir", category: "חופשות", options: ["מזכרת מהטיול", "מפת העיר", "כרטיס למוזיאון", "מטבע מקומי"], correct: 0 },
+  { word: "Sightseeing", category: "חופשות", options: ["קניות בשוק המקומי", "השתזפות בחוף", "סיור באתרים ובנקודות עניין", "טעימות יין"], correct: 2 },
+  { word: "Reservation", category: "חופשות", options: ["הזמנה מראש", "רשימת המתנה", "אישור יציאה", "בקשת שדרוג"], correct: 0 },
+  { word: "Cancellation", category: "חופשות", options: ["דחיית מועד", "אישור הגעה", "החלפת כרטיס", "ביטול"], correct: 3 },
+  { word: "Refund", category: "חופשות", options: ["תשלום מקדמה", "החזר כספי", "תוספת מחיר", "שובר זיכוי"], correct: 1 },
+  { word: "Departure", category: "חופשות", options: ["יציאה / המראה", "נחיתת ביניים", "איסוף כבודה", "אולם הקבלה"], correct: 0 },
+  { word: "Arrival", category: "חופשות", options: ["עזיבת החדר", "הגעה", "יציאת חירום", "שער ההמראה"], correct: 1 },
+  { word: "Terminal", category: "חופשות", options: ["מגדל פיקוח", "מסלול המראה", "מסוף נוסעים", "חניון ארוך טווח"], correct: 2 },
+  { word: "Boarding", category: "חופשות", options: ["הזמנת מונית", "פריקת מזוודות", "בידוק ביטחוני", "עלייה למטוס"], correct: 3 },
+  { word: "Duty-Free", category: "חופשות", options: ["פטור ממכס", "כניסה חופשית", "שירות עצמי", "ללא עמלות המרה"], correct: 0 },
+  { word: "Tourist Trap", category: "חופשות", options: ["מסלול מטיילים מסומן", "מלכודת תיירים — אתר יקר ומסחרי", "מרכז מידע לתייר", "אזור אסור לצילום"], correct: 1 },
+  { word: "Wanderlust", category: "חופשות", options: ["פחד ממקומות זרים", "געגועים הביתה", "תשוקה עזה לנדוד ולטייל", "עייפות מנסיעות"], correct: 2 },
+  { word: "Oasis", category: "חופשות", options: ["נווה מדבר", "לגונה טרופית", "מעיין חם", "דיונת חול"], correct: 0 },
+  { word: "Archipelago", category: "חופשות", options: ["רכס הרים געשי", "שונית אלמוגים", "מפרץ מוגן", "קבוצת איים"], correct: 3 },
+  { word: "Peninsula", category: "חופשות", options: ["אי בודד", "חצי אי", "רצועת חוף", "שפך נהר"], correct: 1 },
+  { word: "Sanctuary", category: "חופשות", options: ["מקלט / שמורת טבע מוגנת", "מצפה כוכבים", "גן בוטני", "אתר ארכיאולוגי"], correct: 0 },
+  { word: "Expedition", category: "חופשות", options: ["טיסה במחלקה ראשונה", "משלחת מחקר או הרפתקאות", "חופשה קצרה בעיר", "סיור מודרך במוזיאון"], correct: 1 },
+  { word: "Voyage", category: "חופשות", options: ["טיול רגלי קצר", "נסיעת עסקים", "מסע ארוך, בעיקר בים", "טיסת שכר"], correct: 2 },
+  { word: "Cruise", category: "חופשות", options: ["שיט תענוגות", "רפסודה בנהר", "מעבורת נוסעים", "סירת מפרש"], correct: 0 },
+  { word: "Resort", category: "חופשות", options: ["בית הארחה כפרי", "אתר נופש עם מתקנים ושירותים", "חניון קרוואנים", "צימר בהר"], correct: 1 },
+  { word: "Backpacking", category: "חופשות", options: ["טיול יוקרה מאורגן", "מסע צלילה", "ספארי ג'יפים", "טיול תרמילאים עצמאי"], correct: 3 },
+  { word: "Hostel", category: "חופשות", options: ["אכסניה — לינה זולה בחדרים משותפים", "מלון בוטיק", "דירת נופש פרטית", "בית מלון חמישה כוכבים"], correct: 0 },
+  { word: "Inn", category: "חופשות", options: ["מסעדת דרכים", "פונדק — אכסניה קטנה ומסורתית", "תחנת דלק", "שוק לילה"], correct: 1 },
+  { word: "Suite", category: "חופשות", options: ["חדר ליחיד", "מרתף המלון", "סוויטה — יחידת אירוח מפוארת", "מרפסת נוף"], correct: 2 },
+  { word: "Penthouse", category: "חופשות", options: ["דירת יוקרה בקומה העליונה", "בקתת עץ ביער", "וילה עם בריכה", "חדר סמוך ללובי"], correct: 0 },
+  { word: "Check-in", category: "חופשות", options: ["בקשת חשבונית", "הזמנת שירות חדרים", "השארת טיפ", "רישום כניסה"], correct: 3 },
+  { word: "Check-out", category: "חופשות", options: ["הארכת שהייה", "עזיבה והחזרת החדר", "החלפת מגבות", "הזמנת השכמה"], correct: 1 },
+  { word: "Valet", category: "חופשות", options: ["שירות החניית רכב", "מדריך טיולים", "נהג מונית", "סוכן נסיעות"], correct: 0 },
+  { word: "Porter", category: "חופשות", options: ["שוער לילה", "דייל אוויר", "סבל — נושא כבודה", "קופאי בדלפק"], correct: 2 },
+  { word: "Guidebook", category: "חופשות", options: ["יומן מסע אישי", "מדריך טיולים כתוב", "אטלס עולמי", "חוברת בטיחות"], correct: 1 },
+  { word: "Landmark", category: "חופשות", options: ["ציון דרך — אתר בולט ומזוהה", "גבול בין מדינות", "תמרור אזהרה", "נקודת תצפית"], correct: 0 },
+  { word: "Monument", category: "חופשות", options: ["כיכר מרכזית", "מזרקה עירונית", "פסל רחוב", "אנדרטה"], correct: 3 },
+  { word: "Panorama", category: "חופשות", options: ["מפה תלת־ממדית", "נוף פנורמי רחב", "תמונת דיוקן", "מצלמת רחוב"], correct: 1 },
+  { word: "Amenities", category: "חופשות", options: ["מתקנים ושירותים נלווים", "דמי ניקיון", "שעות פעילות", "כללי התנהגות"], correct: 0 },
+
+  /* ---------- Phrasal Verbs (30) ---------- */
+  { word: "Run out of", category: "פעלים", options: ["לברוח ממקום", "להיגמר / לאזול", "לרוץ החוצה", "לוותר על משהו"], correct: 1 },
+  { word: "Put off", category: "פעלים", options: ["לדחות למועד מאוחר יותר", "לכבות את האור", "להוריד בגד", "להניח בצד"], correct: 0 },
+  { word: "Call off", category: "פעלים", options: ["להתקשר בחזרה", "לצעוק בקול", "לבטל אירוע או תוכנית", "לסיים שיחה"], correct: 2 },
+  { word: "Turn down", category: "פעלים", options: ["לפנות שמאלה", "להפוך משהו", "ללכת לישון", "לדחות הצעה / להנמיך עוצמה"], correct: 3 },
+  { word: "Give up", category: "פעלים", options: ["לוותר / להפסיק לנסות", "לתת מתנה", "לקום מהמקום", "למסור למישהו"], correct: 0 },
+  { word: "Look after", category: "פעלים", options: ["לחפש אחרי", "לטפל / להשגיח על", "להביט לאחור", "להעריץ מישהו"], correct: 1 },
+  { word: "Look forward to", category: "פעלים", options: ["להביט קדימה", "להתקדם בתור", "לצפות בקוצר רוח ל", "לתכנן מראש"], correct: 2 },
+  { word: "Come across", category: "פעלים", options: ["לחצות את הכביש", "להגיע מרחוק", "להיתקל במקרה", "להבין רמז"], correct: 2 },
+  { word: "Figure out", category: "פעלים", options: ["להבין / לפענח", "לחשב סכום", "לצייר צורה", "לצאת החוצה"], correct: 0 },
+  { word: "Carry on", category: "פעלים", options: ["לסחוב מטען", "להמשיך", "לשאת נאום", "להתלונן"], correct: 1 },
+  { word: "Set off", category: "פעלים", options: ["לכבות אזעקה", "לערוך שולחן", "להזיז הצידה", "לצאת לדרך"], correct: 3 },
+  { word: "Take off", category: "פעלים", options: ["להמריא / להסיר בגד", "לקחת הפסקה", "לגנוב משהו", "לצלם תמונה"], correct: 0 },
+  { word: "Drop off", category: "פעלים", options: ["להפיל בטעות", "להוריד מישהו ביעדו", "לנשור מעץ", "לוותר על מקום"], correct: 1 },
+  { word: "Pick up", category: "פעלים", options: ["לבחור אפשרות", "לטפס למעלה", "לאסוף / להרים", "לקטוף פרי"], correct: 2 },
+  { word: "Get over", category: "פעלים", options: ["לעבור מעל גדר", "לסיים עבודה", "להגיע ליעד", "להתגבר על"], correct: 3 },
+  { word: "Put up with", category: "פעלים", options: ["לסבול / להשלים עם", "לתלות על הקיר", "להתארח אצל", "להרכיב יחד"], correct: 0 },
+  { word: "Run into", category: "פעלים", options: ["להיכנס בריצה", "להיתקל במישהו במקרה", "להתנגש ברכב", "להסתבך בצרות"], correct: 1 },
+  { word: "Break down", category: "פעלים", options: ["לשבור לחתיכות", "לפרוץ דלת", "להתקלקל / לקרוס", "להפסיק לדבר"], correct: 2 },
+  { word: "Bring up", category: "פעלים", options: ["להעלות נושא / לגדל ילד", "להביא למעלה", "להקיא", "להרים משקל"], correct: 0 },
+  { word: "Cut down on", category: "פעלים", options: ["לכרות עץ", "לצמצם / להפחית", "לחתוך לחתיכות", "להוזיל מחיר"], correct: 1 },
+  { word: "Fill out", category: "פעלים", options: ["להשמין", "לרוקן מיכל", "לצאת מלא", "למלא טופס"], correct: 3 },
+  { word: "Find out", category: "פעלים", options: ["לגלות / לברר", "למצוא בחוץ", "לאבד משהו", "להמציא רעיון"], correct: 0 },
+  { word: "Show up", category: "פעלים", options: ["להשוויץ", "להופיע / להגיע", "להצביע למעלה", "להציג מצגת"], correct: 1 },
+  { word: "Sort out", category: "פעלים", options: ["למיין לקבוצות", "לזרוק החוצה", "לפתור / להסדיר", "לבחור מתוך רשימה"], correct: 2 },
+  { word: "Stand for", category: "פעלים", options: ["לעמוד בתור", "לחכות למישהו", "לתמוך במועמד", "לייצג / לסמל"], correct: 3 },
+  { word: "Take after", category: "פעלים", options: ["לדמות לבן משפחה", "לרדוף אחרי", "לקחת בהמשך", "לחקות מפורסם"], correct: 0 },
+  { word: "Turn up", category: "פעלים", options: ["לפנות למעלה", "להופיע במפתיע / להגביר", "להתהפך", "לקפל שרוולים"], correct: 1 },
+  { word: "Work out", category: "פעלים", options: ["לעבוד בחוץ", "לסיים משמרת", "להתאמן / להסתדר בסוף", "לפטר עובד"], correct: 2 },
+  { word: "Pass out", category: "פעלים", options: ["לעבור מבחן", "לחלוף על פני", "לצאת לגמלאות", "להתעלף"], correct: 3 },
+  { word: "Chip in", category: "פעלים", options: ["להשתתף בתשלום / לתרום חלק", "להיכנס פנימה", "לשבור פינה", "להתערב בשיחה"], correct: 0 },
+  { word: "Look up", category: "פעלים", options: ["להביט בשמיים", "לחפש מידע (במילון / באינטרנט)", "לכבד מישהו", "להתעורר מוקדם"], correct: 1 },
+  { word: "Look into", category: "פעלים", options: ["להציץ פנימה", "להביט במראה", "לחקור / לבדוק לעומק", "להיכנס לחדר"], correct: 2 },
+  { word: "Look up to", category: "פעלים", options: ["לטפס למעלה", "לצפות למעלה", "לחכות בסבלנות", "להעריץ / לכבד מישהו"], correct: 3 },
+  { word: "Look down on", category: "פעלים", options: ["לזלזל / להתנשא מעל", "להביט מהמרפסת", "להוריד את המבט", "לרדת במדרגות"], correct: 0 },
+  { word: "Get along with", category: "פעלים", options: ["ללכת יחד עם", "להסתדר / להיות ביחסים טובים עם", "להתקדם בקריירה", "להסכים עם דעה"], correct: 1 },
+  { word: "Get away with", category: "פעלים", options: ["לברוח לחופשה", "להתרחק ממישהו", "לחמוק מעונש", "לקחת משהו בהשאלה"], correct: 2 },
+  { word: "Get by", category: "פעלים", options: ["לעבור ליד", "לקבל אישור", "להגיע בזמן", "להסתדר בקושי / לשרוד כלכלית"], correct: 3 },
+  { word: "Give in", category: "פעלים", options: ["להיכנע / לוותר ללחץ", "להגיש עבודה", "לתרום כסף", "להכניס פנימה"], correct: 0 },
+  { word: "Give away", category: "פעלים", options: ["לזרוק לפח", "לתת בחינם / לחשוף סוד", "להתרחק ממקום", "להחזיר הלוואה"], correct: 1 },
+  { word: "Take up", category: "פעלים", options: ["להרים למעלה", "לתפוס מקום ברכבת", "להתחיל תחביב או עיסוק חדש", "לקבל קידום"], correct: 2 },
+  { word: "Take over", category: "פעלים", options: ["לקחת יותר מדי", "לעבור מעל", "להעביר הלאה", "להשתלט / לקבל שליטה"], correct: 3 },
+  { word: "Turn out", category: "פעלים", options: ["להתברר (בסופו של דבר)", "לכבות את האורות", "לפנות החוצה", "לסובב ידית"], correct: 0 },
+  { word: "Turn into", category: "פעלים", options: ["להיכנס בסיבוב", "להפוך ל / להשתנות ל", "לפנות פנימה", "להתחלף בתור"], correct: 1 },
+  { word: "Make up", category: "פעלים", options: ["לסדר את המיטה", "לטפס למעלה", "להמציא סיפור / להשלים אחרי ריב", "להתאפר בבוקר"], correct: 2 },
+  { word: "Make up for", category: "פעלים", options: ["להכין מראש", "לבנות בשביל", "להחליט עבור מישהו", "לפצות על"], correct: 3 },
+  { word: "Point out", category: "פעלים", options: ["להצביע על / לציין", "לצאת מהנקודה", "לחדד עיפרון", "לכוון החוצה"], correct: 0 },
+  { word: "Pull over", category: "פעלים", options: ["למשוך בחוזקה", "לעצור את הרכב בצד הדרך", "ללבוש סוודר", "לגרור עגלה"], correct: 1 },
+  { word: "Put on", category: "פעלים", options: ["להניח על השולחן", "להדליק מוזיקה", "ללבוש / לעטות", "להעמיס משא"], correct: 2 },
+  { word: "Run over", category: "פעלים", options: ["לרוץ מעבר לגבעה", "לחזור על החומר", "לגלוש מעל הסיר", "לדרוס"], correct: 3 },
+  { word: "See off", category: "פעלים", options: ["ללוות מישהו לפרידה (בשדה התעופה)", "לראות מרחוק", "לגרש מהמקום", "להפסיק לצפות"], correct: 0 },
+  { word: "Set up", category: "פעלים", options: ["לשבת זקוף", "להקים / לארגן / להתקין", "לקבוע שעון מעורר", "לערוך שולחן"], correct: 1 },
+  { word: "Take back", category: "פעלים", options: ["לקחת טרמפ", "להחזיר לאחור סרטון", "לחזור בו מדבריו / להחזיר מוצר", "לזכור את העבר"], correct: 2 },
+  { word: "Throw away", category: "פעלים", options: ["לזרוק כדור רחוק", "להשליך רעיון לאוויר", "לפזר לכל עבר", "לזרוק לפח / להיפטר מ"], correct: 3 },
+  { word: "Try on", category: "פעלים", options: ["למדוד בגד", "לנסות שוב", "להתאמץ יותר", "לטעום מאכל"], correct: 0 },
+  { word: "Warm up", category: "פעלים", options: ["להרתיח מים", "להתחמם / לבצע חימום", "להתלהב מרעיון", "להדליק חימום בבית"], correct: 1 },
+  { word: "Wear out", category: "פעלים", options: ["ללבוש בגד חגיגי", "לצאת לבושים", "להתבלות / להתיש", "להוריד נעליים"], correct: 2 },
+  { word: "Back up", category: "פעלים", options: ["לחזור הביתה", "לעמוד מאחור", "להישען לאחור", "לגבות (קבצים / אדם)"], correct: 3 },
+  { word: "Blow up", category: "פעלים", options: ["להתפוצץ / להתפרץ בכעס", "לנשוף למעלה", "לייבש שיער", "לנפח בלון לאט"], correct: 0 },
+  { word: "Calm down", category: "פעלים", options: ["לרדת למטה בשקט", "להירגע", "להנמיך את הקול", "לשכב לנוח"], correct: 1 },
+  { word: "Catch up", category: "פעלים", options: ["לתפוס כדור באוויר", "לעלות על רכבת", "להשלים פערים / להדביק את הקצב", "לתפוס גנב"], correct: 2 },
+  { word: "Ask out", category: "פעלים", options: ["להזמין מישהו לדייט", "לשאול בקול רם", "לבקש לצאת מהחדר", "לברר כתובת"], correct: 0 },
+  { word: "Ask around", category: "פעלים", options: ["לשאול שאלה מכשילה", "לברר אצל כמה אנשים", "להסתובב בלי מטרה", "לבקש טובה"], correct: 1 },
+  { word: "Break up", category: "פעלים", options: ["לשבור שיא", "לפרוץ בצחוק", "להיפרד / לסיים מערכת יחסים", "לצאת להפסקה"], correct: 2 },
+  { word: "Break into", category: "פעלים", options: ["לשבור לשניים", "להתחיל קריירה", "לקטוע שיחה", "לפרוץ פנימה (לבית / לרכב)"], correct: 3 },
+  { word: "Break out", category: "פעלים", options: ["לפרוץ (מלחמה / מגפה) / להימלט", "לצאת להפסקת צהריים", "לשבור בכוונה", "להתפרק מרוב לחץ"], correct: 0 },
+  { word: "Bring back", category: "פעלים", options: ["להביא קדימה", "להחזיר / לעורר זיכרונות", "לגדל מחדש", "לקנות בחזרה"], correct: 1 },
+  { word: "Bring about", category: "פעלים", options: ["להביא בערך", "לספר על", "לגרום ל / לחולל שינוי", "להסתובב עם"], correct: 2 },
+  { word: "Call back", category: "פעלים", options: ["לקרוא מאחור", "לבטל הזמנה", "לצעוק בחזרה", "להחזיר שיחת טלפון"], correct: 3 },
+  { word: "Carry out", category: "פעלים", options: ["לבצע / להוציא לפועל", "לסחוב החוצה", "להזמין אוכל הביתה", "להמשיך בחוץ"], correct: 0 },
+  { word: "Check in", category: "פעלים", options: ["לבדוק בפנים", "לבצע רישום כניסה (למלון / לטיסה)", "לסמן וי", "להפקיד צ'ק"], correct: 1 },
+  { word: "Check out", category: "פעלים", options: ["למחוק מהרשימה", "לצאת לבדיקה", "לעזוב מלון / לבדוק משהו מעניין", "לשלם בקופה בלבד"], correct: 2 },
+  { word: "Cheer up", category: "פעלים", options: ["להריע לקבוצה", "להרים כוסית", "לצעוק בשמחה", "לעודד / להתעודד"], correct: 3 },
+  { word: "Come up with", category: "פעלים", options: ["להעלות רעיון / למצוא פתרון", "לעלות במדרגות עם", "להגיע יחד", "להתקרב אל"], correct: 0 },
+  { word: "Come down with", category: "פעלים", options: ["לרדת ביחד", "לחלות ב", "להוריד מחיר", "להירגע לאט"], correct: 1 },
+  { word: "Count on", category: "פעלים", options: ["לספור בקול", "לחשב מחדש", "לסמוך על", "להמשיך לספור"], correct: 2 },
+  { word: "Cross out", category: "פעלים", options: ["לחצות את הגבול", "לצאת בזעם", "להצטלב בדרך", "למחוק בקו"], correct: 3 },
+  { word: "Cut off", category: "פעלים", options: ["לנתק / לקטוע", "לחתוך פרוסה", "להוריד במחיר", "לקצר שיער"], correct: 0 },
+  { word: "Deal with", category: "פעלים", options: ["לחלק קלפים", "להתמודד עם / לטפל ב", "לעשות עסקה עם", "להתווכח עם"], correct: 1 },
+  { word: "Do over", category: "פעלים", options: ["לעשות יותר מדי", "לסיים סופית", "לעשות מחדש", "להגזים במאמץ"], correct: 2 },
+  { word: "Do without", category: "פעלים", options: ["לעשות בחינם", "לפעול בלי רשות", "לוותר מראש", "להסתדר בלי"], correct: 3 },
+  { word: "Dress up", category: "פעלים", options: ["להתגנדר / להתחפש", "לתלות כביסה", "לתפור בגד", "ללבוש בשכבות"], correct: 0 },
+  { word: "Drop by", category: "פעלים", options: ["ליפול ליד", "לקפוץ לביקור קצר", "לרדת בתחנה", "לשמוט בטעות"], correct: 1 },
+  { word: "Drop out", category: "פעלים", options: ["להפיל החוצה", "לצאת מהמשחק בהגרלה", "לנשור מלימודים", "לרדת מהר"], correct: 2 },
+  { word: "Eat out", category: "פעלים", options: ["לאכול הכול", "לאכול בחוץ בגינה", "לסיים את הצלחת", "לאכול במסעדה"], correct: 3 },
+  { word: "End up", category: "פעלים", options: ["למצוא את עצמו בסוף ב", "לסיים ראשון", "להרים ידיים", "לעלות לגמר"], correct: 0 },
+  { word: "Fall apart", category: "פעלים", options: ["ליפול הצידה", "להתפרק / לקרוס", "ליפול בנפרד", "להתרחק זה מזה"], correct: 1 },
+  { word: "Fall behind", category: "פעלים", options: ["ליפול אחורה", "להישאר מאחור בכוונה", "לפגר / להישאר מאחור בקצב", "לשכוח מאחור"], correct: 2 },
+  { word: "Fall for", category: "פעלים", options: ["ליפול בגלל", "להתמוטט מעייפות", "לוותר למען", "להתאהב / ליפול בפח"], correct: 3 },
+  { word: "Fall through", category: "פעלים", options: ["להתבטל / לא לצאת לפועל (תוכנית)", "ליפול דרך חור", "לעבור בקושי", "להיכשל במבחן"], correct: 0 },
+  { word: "Get back", category: "פעלים", options: ["להתרחק אחורה", "לחזור / לקבל בחזרה", "לעמוד מאחור", "להשיב מלחמה"], correct: 1 },
+  { word: "Get off", category: "פעלים", options: ["להוריד בגד", "להתחמק ממס", "לרדת (מאוטובוס / מרכבת)", "לצאת מוקדם"], correct: 2 },
+  { word: "Get on", category: "פעלים", options: ["להתלבש מהר", "להמשיך בשלו", "להתקדם בתפקיד", "לעלות (על אוטובוס / רכבת)"], correct: 3 },
+  { word: "Get through", category: "פעלים", options: ["לצלוח תקופה קשה / להשיג בטלפון", "לעבור דרך שער", "לסיים לגמרי", "לחדור פנימה"], correct: 0 },
+  { word: "Get together", category: "פעלים", options: ["להתאחד למטרה", "להיפגש / להתכנס", "להתחתן", "לאסוף יחד"], correct: 1 },
+  { word: "Go ahead", category: "פעלים", options: ["ללכת ראשון", "להוביל בתחרות", "להתקדם / להמשיך (\"בבקשה, קדימה\")", "ללכת ישר"], correct: 2 },
+  { word: "Go off", category: "פעלים", options: ["ללכת מכאן", "לכבות את עצמו", "לרדת מהבמה", "להתפוצץ / לצלצל (אזעקה) / להתקלקל (מזון)"], correct: 3 },
+  { word: "Go on", category: "פעלים", options: ["להמשיך / להתרחש", "ללכת קדימה", "לעלות על", "להידלק"], correct: 0 },
+  { word: "Go over", category: "פעלים", options: ["לעבור מעל הגשר", "לעבור על / לסקור שוב", "ללכת לצד השני", "להגזים"], correct: 1 },
+  { word: "Go through", category: "פעלים", options: ["ללכת דרך היער", "לנסוע ישר", "לעבור חוויה / לעבור על מסמכים", "להיכנס בלי תור"], correct: 2 },
+  { word: "Grow up", category: "פעלים", options: ["לצמוח לגובה", "לגדל צמחים", "להצמיח זקן", "להתבגר"], correct: 3 },
+  { word: "Hand in", category: "פעלים", options: ["להגיש (עבודה / מסמך)", "להכניס יד", "לתת יד", "למסור פנימה חפץ"], correct: 0 },
+  { word: "Hand out", category: "פעלים", options: ["להושיט יד החוצה", "לחלק (דפים / עלונים)", "לנפנף לשלום", "לוותר על תור"], correct: 1 },
+  { word: "Hang on", category: "פעלים", options: ["לתלות על וו", "להיאחז בעץ", "לחכות רגע / להחזיק מעמד", "להתקשר שוב"], correct: 2 },
+  { word: "Hang out", category: "פעלים", options: ["לתלות כביסה בחוץ", "להוציא ראש מהחלון", "להשתלשל מטה", "לבלות (עם חברים)"], correct: 3 },
+  { word: "Hang up", category: "פעלים", options: ["לנתק שיחת טלפון", "לתלות תמונה גבוה", "להרים למעלה", "להתעכב"], correct: 0 },
+  { word: "Hold on", category: "פעלים", options: ["להחזיק חזק בידיים", "לחכות / להחזיק מעמד", "לעצור מישהו", "לשמור מקום"], correct: 1 },
+  { word: "Hold up", category: "פעלים", options: ["להרים משקולת", "להחזיק גבוה", "לעכב / לשדוד", "לתמוך מלמטה"], correct: 2 },
+  { word: "Keep on", category: "פעלים", options: ["לשמור עליו", "להשאיר דלוק", "לא להוריד בגד", "להתמיד / להמשיך לעשות"], correct: 3 },
+  { word: "Keep up with", category: "פעלים", options: ["לעמוד בקצב של", "לשמור למעלה", "להמשיך לשמור על", "להישאר ער עם"], correct: 0 },
+  { word: "Kick off", category: "פעלים", options: ["לבעוט החוצה", "לפתוח / להתחיל (אירוע)", "להעיף מהקבוצה", "לחלוץ נעליים"], correct: 1 },
+  { word: "Knock out", category: "פעלים", options: ["לדפוק בדלת", "לדחוף החוצה", "להפיל / לנקאוט", "לשבור חלון"], correct: 2 },
+  { word: "Lay off", category: "פעלים", options: ["לשכב בצד", "להניח על הרצפה", "לקחת חופש", "לפטר (מסיבות צמצום)"], correct: 3 },
+  { word: "Leave out", category: "פעלים", options: ["להשמיט / להשאיר בחוץ", "לעזוב את הבית", "לצאת אחרון", "לשכוח בחוץ בטעות"], correct: 0 },
+  { word: "Let down", category: "פעלים", options: ["להוריד למטה בחבל", "לאכזב", "לתת לרדת", "להרפות אחיזה"], correct: 1 },
+  { word: "Let in", category: "פעלים", options: ["לוותר בקלות", "לשתף בסוד", "להכניס פנימה / לאפשר כניסה", "לקבל לעבודה"], correct: 2 },
+  { word: "Log in", category: "פעלים", options: ["לרשום ביומן", "לחתוך בול עץ", "להיכנס לרשימה", "להתחבר למערכת"], correct: 3 },
+  { word: "Log out", category: "פעלים", options: ["להתנתק מהמערכת", "למחוק חשבון", "לצאת מהבניין", "לכבות את המחשב"], correct: 0 },
+  { word: "Mix up", category: "פעלים", options: ["לערבב בקערה", "לבלבל בין דברים", "להקפיץ במחבת", "לגוון בתפריט"], correct: 1 },
+  { word: "Move in", category: "פעלים", options: ["לזוז פנימה בתור", "להתקרב לאט", "לעבור לגור (בדירה חדשה)", "להזיז רהיטים"], correct: 2 },
+  { word: "Move on", category: "פעלים", options: ["לזוז הצידה", "לעבור דירה", "להתקדם בתור", "להמשיך הלאה (אחרי משבר)"], correct: 3 },
+  { word: "Pass away", category: "פעלים", options: ["ללכת לעולמו / להיפטר", "לחלוף במהירות", "למסור רחוק", "לעבור מבחן בקושי"], correct: 0 },
+  { word: "Pay back", category: "פעלים", options: ["לשלם מראש", "להחזיר חוב / לגמול", "לשלם במזומן", "לקבל עודף"], correct: 1 },
+  { word: "Pay off", category: "פעלים", options: ["לשלם קנס", "לתת שוחד", "להשתלם / לסלק חוב במלואו", "לשלם ולעזוב"], correct: 2 },
+  { word: "Pull off", category: "פעלים", options: ["למשוך הצידה", "לתלוש מדבקה", "להוריד כיסוי", "להצליח במשימה קשה"], correct: 3 },
+  { word: "Put away", category: "פעלים", options: ["להחזיר למקום / לאחסן", "לזרוק רחוק", "לדחות בנימוס", "לשים בצד לרגע"], correct: 0 },
+  { word: "Put down", category: "פעלים", options: ["לרדת למטה", "להניח / להשפיל מישהו", "לכתוב מלמעלה", "להוריד מחיר"], correct: 1 },
+  { word: "Put out", category: "פעלים", options: ["להוציא זבל בלבד", "לפרסם מודעה", "לכבות (שריפה / סיגריה)", "להושיט יד"], correct: 2 },
+  { word: "Put together", category: "פעלים", options: ["לשים זה ליד זה", "לחבר אנשים", "לארוז יחד", "להרכיב (רהיט / מצגת)"], correct: 3 },
+  { word: "Rule out", category: "פעלים", options: ["לשלול / לפסול אפשרות", "לקבוע חוקים", "למשול ביד רמה", "לסמן בסרגל"], correct: 0 },
+  { word: "Run away", category: "פעלים", options: ["לרוץ למרחקים", "לברוח", "להתרחק בהליכה", "לרוץ מהר יותר"], correct: 1 },
+  { word: "Set aside", category: "פעלים", options: ["לשבת בצד", "לקבוע פגישה", "להקצות / לשים בצד (כסף / זמן)", "לדחות הצעה"], correct: 2 },
+  { word: "Settle down", category: "פעלים", options: ["לשבת בנחת", "לשקוע בכיסא", "לסגור חשבון", "להתמסד / להירגע"], correct: 3 },
+  { word: "Show off", category: "פעלים", options: ["להשוויץ / להתרברב", "להציג מהבמה", "לכבות תצוגה", "להראות את הדרך"], correct: 0 },
+  { word: "Shut down", category: "פעלים", options: ["לטרוק דלת", "לכבות / לסגור (מפעל / מחשב)", "להשתיק מישהו", "לנעול חלון"], correct: 1 },
+  { word: "Sign up", category: "פעלים", options: ["לחתום למעלה", "לסמן בעט", "להירשם (לקורס / לשירות)", "להצביע בעד"], correct: 2 },
+  { word: "Slow down", category: "פעלים", options: ["לרדת לאט", "להנמיך ציפיות", "להיחלש בהדרגה", "להאט"], correct: 3 },
+  { word: "Speak up", category: "פעלים", options: ["לדבר בקול רם / להשמיע עמדה", "לדבר מלמעלה", "לנאום בפומבי", "להתחיל לדבר ראשון"], correct: 0 },
+  { word: "Stand out", category: "פעלים", options: ["לעמוד בחוץ", "לבלוט / להתבלט", "לעמוד זקוף", "לצאת מהשורה"], correct: 1 },
+  { word: "Stand up for", category: "פעלים", options: ["לקום בשביל מישהו", "לעמוד בתור עבור", "להגן על / לעמוד לצד", "להחליף מישהו בעמידה"], correct: 2 },
+  { word: "Stay up", category: "פעלים", options: ["להישאר למעלה", "לגור בקומה עליונה", "לעמוד יציב", "להישאר ער עד מאוחר"], correct: 3 },
+  { word: "Stick to", category: "פעלים", options: ["לדבוק ב / להתמיד ב (תוכנית)", "להדביק אל", "להיצמד למישהו", "לתקוע מקל"], correct: 0 },
+  { word: "Take apart", category: "פעלים", options: ["לקחת חלק", "לפרק לחלקים", "להפריד בין ניצים", "לקחת הצידה"], correct: 1 },
+  { word: "Take care of", category: "פעלים", options: ["להיזהר מ", "לקחת ברצינות", "לטפל ב / לדאוג ל", "לקחת אחריות בלבד"], correct: 2 },
+  { word: "Think over", category: "פעלים", options: ["לחשוב יותר מדי", "לחשוב בקול", "להיזכר שוב", "לשקול היטב"], correct: 3 },
+  { word: "Turn on", category: "פעלים", options: ["להדליק (מכשיר)", "להסתובב במקום", "לפנות ימינה", "לפתוח ברז"], correct: 0 },
+  { word: "Turn off", category: "פעלים", options: ["לרדת מהכביש הראשי", "לכבות (מכשיר)", "להסתובב אחורה", "לסגור דלת"], correct: 1 },
+  { word: "Watch out", category: "פעלים", options: ["לצפות מבחוץ", "לשמור על הזמן", "להיזהר / לשים לב", "לחפש בעיניים"], correct: 2 },
+  { word: "Wake up", category: "פעלים", options: ["לקום מהכיסא", "להעיר הערה", "להישאר ער", "להתעורר / להעיר"], correct: 3 },
+  { word: "Write down", category: "פעלים", options: ["לרשום / לכתוב על דף", "לכתוב למטה", "למחוק שורה", "לחתום מסמך"], correct: 0 },
+  { word: "Give back", category: "פעלים", options: ["לתת מאחור", "להחזיר (חפץ לבעליו)", "לתרום לקהילה בלבד", "לוותר בחזרה"], correct: 1 }
+];
+
+/* ===================== לוגיקת המשחק ===================== */
+const startScreen  = document.getElementById("startScreen");
+const quizScreen   = document.getElementById("quizScreen");
+const resultScreen = document.getElementById("resultScreen");
+
+const progressRow     = document.getElementById("progressRow");
+const progressTrack   = document.getElementById("progressTrack");
+const progressFill    = document.getElementById("progressFill");
+const questionCounter = document.getElementById("questionCounter");
+const scoreChip       = document.getElementById("scoreChip");
+
+const wordCategory     = document.getElementById("wordCategory");
+const wordEnglish      = document.getElementById("wordEnglish");
+const optionsContainer = document.getElementById("optionsContainer");
+const feedback         = document.getElementById("feedback");
+const nextBtn          = document.getElementById("nextBtn");
+
+const startBtn      = document.getElementById("startBtn");
+const restartBtn    = document.getElementById("restartBtn");
+const backToMenuBtn = document.getElementById("backToMenuBtn");
+const nextPartBtn   = document.getElementById("nextPartBtn");
+const partsGrid     = document.getElementById("partsGrid");
+const partChips     = document.getElementById("partChips");
+
+const PART_SIZE = 30;
+const PHRASAL_QUESTIONS = QUESTIONS.filter(q => q.category === "פעלים");
+const TOTAL_PARTS = Math.ceil(PHRASAL_QUESTIONS.length / PART_SIZE);
+
+let selectedCategory = "all";
+let selectedPart = 1;
+let quizQuestions = [];
+let currentIndex = 0;
+let correctAnswers = 0;
+
+/* בחירת נושא במסך הפתיחה */
+document.querySelectorAll(".category-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedCategory = btn.dataset.cat;
+    partsGrid.classList.toggle("show", selectedCategory === "פעלים");
+  });
+});
+
+/* בחירת חלק במסך הפתיחה */
+document.querySelectorAll(".part-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".part-btn").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedPart = parseInt(btn.dataset.part, 10);
+  });
+});
+
+/* ערבוב מערך (Fisher–Yates) */
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(screen) {
+  [startScreen, quizScreen, resultScreen].forEach(s => s.classList.remove("active"));
+  screen.classList.add("active");
+}
+
+function getPool() {
+  if (selectedCategory === "all") return QUESTIONS;
+  if (selectedCategory === "פעלים") {
+    const start = (selectedPart - 1) * PART_SIZE;
+    return PHRASAL_QUESTIONS.slice(start, start + PART_SIZE);
+  }
+  return QUESTIONS.filter(q => q.category === selectedCategory);
+}
+
+function renderPartChips() {
+  const isPhrasal = selectedCategory === "פעלים";
+  partChips.classList.toggle("show", isPhrasal);
+  if (!isPhrasal) return;
+
+  partChips.innerHTML = "";
+  for (let p = 1; p <= TOTAL_PARTS; p++) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "part-chip" + (p === selectedPart ? " active" : "");
+    chip.textContent = p;
+    chip.setAttribute("aria-label", "מעבר לחלק " + p);
+    chip.addEventListener("click", () => {
+      if (p !== selectedPart) switchPart(p);
+    });
+    partChips.appendChild(chip);
+  }
+}
+
+function switchPart(p) {
+  selectedPart = p;
+  document.querySelectorAll(".part-btn").forEach(b =>
+    b.classList.toggle("selected", parseInt(b.dataset.part, 10) === p)
+  );
+  quizQuestions = shuffle(getPool());
+  currentIndex = 0;
+  correctAnswers = 0;
+  renderPartChips();
+  renderQuestion();
+}
+
+function startQuiz() {
+  quizQuestions = shuffle(getPool());
+  currentIndex = 0;
+  correctAnswers = 0;
+
+  progressRow.style.display = "flex";
+  progressTrack.style.display = "block";
+  renderPartChips();
+  showScreen(quizScreen);
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizQuestions[currentIndex];
+
+  questionCounter.textContent =
+    (selectedCategory === "פעלים" ? "חלק " + selectedPart + " · " : "") +
+    "שאלה " + (currentIndex + 1) + " מתוך " + quizQuestions.length;
+  scoreChip.textContent = "נכונות: " + correctAnswers;
+  progressFill.style.width = ((currentIndex) / quizQuestions.length * 100) + "%";
+
+  wordCategory.textContent =
+    q.category === "מטבח"  ? "🍳 מטבח וקולינריה" :
+    q.category === "חופשות" ? "✈️ חופשות ונסיעות" :
+    "🔗 Phrasal Verbs";
+  wordEnglish.textContent = q.word;
+
+  optionsContainer.innerHTML = "";
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.type = "button";
+    btn.textContent = opt;
+    btn.addEventListener("click", () => handleAnswer(i, btn));
+    optionsContainer.appendChild(btn);
+  });
+
+  feedback.className = "feedback";
+  feedback.textContent = "";
+  nextBtn.classList.remove("show");
+}
+
+function handleAnswer(chosenIndex, chosenBtn) {
+  const q = quizQuestions[currentIndex];
+  const buttons = optionsContainer.querySelectorAll(".option-btn");
+
+  /* נעילת כל הכפתורים */
+  buttons.forEach(b => (b.disabled = true));
+
+  const isCorrect = chosenIndex === q.correct;
+
+  if (isCorrect) {
+    correctAnswers++;
+    chosenBtn.classList.add("correct");
+    feedback.textContent = "מצוין! תשובה נכונה 🎉";
+    feedback.classList.add("show", "good");
+  } else {
+    chosenBtn.classList.add("wrong");
+    buttons[q.correct].classList.add("correct");
+    feedback.textContent = "לא מדויק. התרגום הנכון של \"" + q.word + "\" הוא: " + q.options[q.correct];
+    feedback.classList.add("show", "bad");
+  }
+
+  /* עמעום שאר האפשרויות */
+  buttons.forEach((b, i) => {
+    if (i !== chosenIndex && i !== q.correct) b.classList.add("dimmed");
+  });
+
+  scoreChip.textContent = "נכונות: " + correctAnswers;
+  progressFill.style.width = ((currentIndex + 1) / quizQuestions.length * 100) + "%";
+
+  nextBtn.textContent = currentIndex === quizQuestions.length - 1 ? "לסיכום התרגול" : "שאלה הבאה";
+  nextBtn.classList.add("show");
+}
+
+function nextQuestion() {
+  if (currentIndex < quizQuestions.length - 1) {
+    currentIndex++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  progressRow.style.display = "none";
+  progressTrack.style.display = "none";
+
+  const total = quizQuestions.length;
+  const pct = Math.round((correctAnswers / total) * 100);
+
+  document.getElementById("resultPct").textContent = pct + "%";
+  document.getElementById("resultFrac").textContent = correctAnswers + " מתוך " + total;
+  document.getElementById("correctCount").textContent = correctAnswers;
+  document.getElementById("wrongCount").textContent = total - correctAnswers;
+  document.getElementById("scoreCircle").style.setProperty("--pct", pct);
+
+  const emoji = document.getElementById("resultEmoji");
+  const msg = document.getElementById("resultMsg");
+
+  if (pct >= 90) {
+    emoji.textContent = "🏆";
+    msg.textContent = "רמה יוצאת מן הכלל! שליטה מרשימה באוצר מילים מתקדם.";
+  } else if (pct >= 75) {
+    emoji.textContent = "🌟";
+    msg.textContent = "תוצאה מצוינת! עוד תרגול קצר ותגיעו לשליטה מלאה.";
+  } else if (pct >= 50) {
+    emoji.textContent = "💪";
+    msg.textContent = "התחלה טובה. שווה לחזור על המילים שפספסתם ולתרגל שוב.";
+  } else {
+    emoji.textContent = "📖";
+    msg.textContent = "כל מומחה התחיל מתרגול. נסו שוב — החזרה היא המפתח לזכירה.";
+  }
+
+  const isPhrasal = selectedCategory === "פעלים";
+  nextPartBtn.style.display = isPhrasal && selectedPart < TOTAL_PARTS ? "block" : "none";
+  if (isPhrasal && selectedPart < TOTAL_PARTS) {
+    nextPartBtn.textContent = "המשך לחלק " + (selectedPart + 1);
+  }
+
+  showScreen(resultScreen);
+}
+
+startBtn.addEventListener("click", startQuiz);
+nextBtn.addEventListener("click", nextQuestion);
+restartBtn.addEventListener("click", startQuiz);
+nextPartBtn.addEventListener("click", () => {
+  progressRow.style.display = "flex";
+  progressTrack.style.display = "block";
+  showScreen(quizScreen);
+  switchPart(selectedPart + 1);
+});
+backToMenuBtn.addEventListener("click", () => {
+  progressRow.style.display = "none";
+  progressTrack.style.display = "none";
+  showScreen(startScreen);
+});
+</script>
+</body>
+</html>
